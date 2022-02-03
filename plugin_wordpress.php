@@ -19,16 +19,22 @@ register_activation_hook( __FILE__, 'init_plugin' );
 
 //Send to Discord
 function discord_notif( $comment_ID, $comment_approved ) {
-    if ( 1 === $comment_approved ) {
-        $comment   = get_comment( $comment_ID );
-        $post_id   = $comment->comment_post_ID;
+     if ( 1 === $comment_approved ) {
+        $comment    = get_comment( $comment_ID );
+        $post_id    = $comment->comment_post_ID;
         $timestamp = date( "c", strtotime( "now" ) );
+        $author = $comment->comment_author;
+
+        $bot_name    = get_option( 'bot_name' ) == "" ? "Bot" : get_option( 'bot_name' );
+        $bot_content = get_option( 'bot_message' ) == "" ? null : get_option( 'bot_message' );
+        $bot_comment = get_option( 'bot_comment' ) == "" ? "Comment" : get_option( 'bot_comment' );
+        $bot_author = get_option( 'bot_author' ) == "" ? "Author" : get_option( 'bot_comment' );
 
         $json_data = json_encode( [
 
-            "username" => get_option( 'bot_name' ),
+            "username" => $bot_name,
             "tts"      => false,
-            "content"  => get_option( 'bot_message' ),
+            "content"  => $bot_content,
 
             "embeds" => [
                 [
@@ -36,14 +42,14 @@ function discord_notif( $comment_ID, $comment_approved ) {
 
                     "type" => "rich",
 
-                    "description" => get_option( 'bot_comment' ) . ": " . $comment->comment_content,
+                    "description" =>   $bot_comment . ": " . $comment->comment_content,
 
                     "timestamp" => $timestamp,
 
                     "color" => hexdec( "3366ff" ),
 
                     "author" => [
-                        "name" => get_option( 'bot_author' ) . ": " . $comment->comment_author,
+                        "name" => $bot_author . ": " . ucfirst($author),
                     ],
                 ]
             ]
